@@ -1,13 +1,13 @@
 <?php
 $lang = array (
 'sitetile'		=> 'Vinaget',
-'version'		=> 'VinaGet v2.7.0 Final',
+'version'		=> 'VinaGet 3.3 LTS',
 'homepage'		=> 'vinaget.us',
 'title'			=> '%s - Premium link generator',
 'login'			=> 'Please enter password to login.',
 'password'		=> 'Password',
 'plugins'		=> 'Plugins',
-'premium'		=> 'Premium Accounts :',
+'premium'		=> 'Premium Accounts',
 'moreacc'		=> 'More accounts >>>',
 'lessacc'		=> '<<< Less accounts',
 'main'			=> 'Main Window',
@@ -17,8 +17,8 @@ $lang = array (
 'check'			=> 'Check Acc',
 'log'			=> 'Log Out',
 'welcome'		=> 'Fast and unlimited premium link generator',
-'update1'		=> 'There\'s an update for vng270',
-'update2'		=> 'Get update.R%s.zip',
+'update1'		=> 'There\'s an update for vinaget',
+'update2'		=> 'Get new update v%s',
 'maxline'		=> '(max 10 link for one times)',
 'sbdown'		=> 'Download',
 'dlhere'		=> 'Download here:',
@@ -31,7 +31,7 @@ $lang = array (
 'dsuccess'		=> 'Donate Success!',
 'getloading'	=> 'checking...',
 'notaccess'		=> 'You do not have permission to access this page !',
-'notice'		=> 'Auto del file after <b>%s</b>. Limit <b>%s</b> file per <b>%s</b> for <b>1</b> IP',
+'notice'		=> 'Auto delete file after <b>%s</b>. Limit <b>%s</b> file per <b>%s</b> for <b>1</b> IP',
 'yourip'		=> 'Your IP:',
 'yourjob'		=> 'Your jobs:',
 'youused'		=> 'You used',
@@ -63,7 +63,7 @@ $lang = array (
 'notfile'		=> 'No Files Found',
 'acdis'			=> 'Action Disabled',
 'ac'			=> 'Action',
-'name'			=> 'Name',
+'name'			=> 'File Name',
 'size'			=> 'Size',
 'date'			=> 'Date',
 'original'		=> 'Original Link',
@@ -104,6 +104,7 @@ $lang = array (
 'notwork'		=> 'Not Work',
 'work'			=> 'Work',
 'removed'		=> '[REMOVED]',
+'notremoved'	=> '[NOT REMOVE]',
 'unknown'		=> 'unknown',
 'linkpass'		=> 'Link have password!',
 'wrongpass'		=> 'Wrong password!',
@@ -111,13 +112,16 @@ $lang = array (
 'notsupportacc'	=> 'Not support account, use cookie instead',
 'notsupportpass'=> 'Not support password currently for %1$s',
 'checkacc'		=> 'Check %1$s account',
-'noplugin'		=> 'You don\'t have %s account checker.<br/>Ask someone to make it'
+'noplugin'		=> 'You don\'t have %s account checker.<br/>Ask someone to make it',
+'reset'			=> 'Reset',
+'autoreset'		=> 'Auto reset',
+'postcbox'		=> 'Auto post cbox',
+'searchuser'	=> 'Auto search user',
+'debridtype'	=> 'Debrid Type:',
 );
 /*
-* Open Source Project
-* Vinaget by ..::[H]::..
-* Version: 2.7.0 Final
-* English Language
-* Language Class By [FZ][r62]
+* Vinaget by LTT
+* Version: 3.3 LTS
+* Language: English
 */
 ?>

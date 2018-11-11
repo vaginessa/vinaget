@@ -1,11 +1,14 @@
 <?php
+
 /**
  * Mega.co.nz downloader
  * Require mcrypt, curl
  * @license GNU GPLv3 http://opensource.org/licenses/gpl-3.0.html
  * @author ZonD80
+ * Fix by rayyan2005
  */
-class MEGA {
+class MEGA
+{
 
     private $seqno, $f;
 
@@ -13,33 +16,63 @@ class MEGA {
      * Class constructor
      * @param string $file_hash File hash, coming after # in mega URL
      */
-    function __construct($file_hash) {
-        $this->seqno = 0;
+    public function __construct($file_hash)
+    {
+        $this->seqno = rand(0, 0xFFFFFFFF);
         $this->f = $this->mega_get_file_info($file_hash);
     }
 
-    function a32_to_str($hex) {
-        return call_user_func_array('pack', array_merge(array('N*'), $hex));
+    public function a32_to_str($hex)
+    {
+        return call_user_func_array('pack', array_merge(array(
+            'N*',
+        ), $hex));
     }
 
-    function aes_ctr_decrypt($data, $key, $iv) {
+    public function aes_ctr_decrypt($data, $key, $iv)
+    {
         return mcrypt_decrypt(MCRYPT_RIJNDAEL_128, $key, $data, 'ctr', $iv);
     }
 
-    function base64_to_a32($s) {
+    public function base64_to_a32($s)
+    {
         return $this->str_to_a32($this->base64urldecode($s));
     }
 
-    function base64urldecode($data) {
+    public function base64urldecode($data)
+    {
         $data .= substr('==', (2 - strlen($data) * 3) % 4);
-        $data = str_replace(array('-', '_', ','), array('+', '/', ''), $data);
+        $data = str_replace(array(
+            '-',
+            '_',
+            ',',
+        ), array(
+            '+',
+            '/',
+            '',
+        ), $data);
         return base64_decode($data);
     }
 
-    function str_to_a32($b) {
+    public function str_to_a32($b)
+    {
         // Add padding, we need a string with a length multiple of 4
         $b = str_pad($b, 4 * ceil(strlen($b) / 4), "\0");
         return array_values(unpack('N*', $b));
+    }
+
+    public function post($url, $post)
+    {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        $page = curl_exec($ch);
+        curl_close($ch);
+        return $page;
     }
 
     /**
@@ -47,23 +80,23 @@ class MEGA {
      * @param array $req data to be sent to mega
      * @return type
      */
-    function mega_api_req($req) {
 
-        $ch = curl_init('https://g.api.mega.co.nz/cs?id=' . ($this->seqno++)/* . ($sid ? '&sid=' . $sid : '') */);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(array($req)));
-        $resp = curl_exec($ch);
-        curl_close($ch);
+    public function mega_api_req($req)
+    {
+        $resp = $this->post('https://g.api.mega.co.nz/cs?id=' . ($this->seqno++) . '&', json_encode(array(
+            $req,
+        )), 0);
         $resp = json_decode($resp, true);
         return $resp[0];
     }
 
-    function aes_cbc_decrypt($data, $key) {
+    public function aes_cbc_decrypt($data, $key)
+    {
         return mcrypt_decrypt(MCRYPT_RIJNDAEL_128, $key, $data, MCRYPT_MODE_CBC, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0");
     }
 
-    function mega_dec_attr($attr, $key) {
+    public function mega_dec_attr($attr, $key)
+    {
         $attr = trim($this->aes_cbc_decrypt($attr, $this->a32_to_str($key)));
         if (substr($attr, 0, 6) != 'MEGA{"') {
             return false;
@@ -71,21 +104,21 @@ class MEGA {
         return json_decode(substr($attr, 4), true);
     }
 
-    /**
+    /*
      * Downloads file from megaupload
      * @param string $as_attachment Download file as attachment, default true
      * @param string $local_path Save file to specified by $local_path folder
      * @return boolean True
      */
-    function download($as_attachment = true, $local_path = null) {
+
+    public function download($as_attachment = true, $local_path = null)
+    {
         $ch = curl_init($this->f['binary_url']);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        //curl_setopt($ch, CURLOPT_VERBOSE, true);
         $data_enc = curl_exec($ch);
         curl_close($ch);
         $data = $this->aes_ctr_decrypt($data_enc, $this->a32_to_str($this->f['k']), $this->a32_to_str($this->f['iv']));
         if ($as_attachment) {
-            //die(var_dump($this->f['attr']['n']));
             header("Content-Disposition: attachment;filename=\"{$this->f['attr']['n']}\"");
             header('Content-Description: File Transfer');
             header('Content-Type: application/octet-stream');
@@ -99,14 +132,10 @@ class MEGA {
             file_put_contents($local_path . DIRECTORY_SEPARATOR . $this->f['attr']['n'], $data);
             return true;
         }
-        /* $file_mac = cbc_mac($data, $k, $iv);
-          print "\nchecking mac\n";
-          if (array($file_mac[0] ^ $file_mac[1], $file_mac[2] ^ $file_mac[3]) != $meta_mac) {
-          echo "MAC mismatch";
-          } */
     }
 
-    function get_chunks($size) {
+    public function get_chunks($size)
+    {
         $chunks = array();
         $p = $pp = 0;
 
@@ -130,15 +159,15 @@ class MEGA {
         return $chunks;
     }
 
-    /**
+    /*
      * Downloads file from megaupload as a stream (useful if you want to implement megaupload proxy)
      * @param string $as_attachment Download file as attachment, default true
      * @param string $local_path Save file to specified by $local_path folder
      * @return boolean True
      */
-    function stream_download($as_attachment = true, $local_path = null) {
 
-        //$data = $this->aes_ctr_decrypt($data_enc, $this->a32_to_str($this->f['k']), $this->a32_to_str($this->f['iv']));
+    public function stream_download($as_attachment = true, $local_path = null)
+    {
         if ($as_attachment) {
             header("Content-Disposition: attachment;filename=\"{$this->f['attr']['n']}\"");
             header('Content-Description: File Transfer');
@@ -160,8 +189,8 @@ class MEGA {
 
         $opts = array(
             $protocol => array(
-                'method' => 'GET'
-            )
+                'method' => 'GET',
+            ),
         );
 
         $context = stream_context_create($opts);
@@ -188,45 +217,68 @@ class MEGA {
             if ($as_attachment) {
                 print $chunk;
                 ob_flush();
-                }
-            else
+            } else {
                 fwrite($destfile, $chunk);
+            }
+
         }
 
         // Terminate decryption handle and close module
         mcrypt_generic_deinit($cipher);
         mcrypt_module_close($cipher);
         fclose($stream);
-        if (!$as_attachment)
+        if (!$as_attachment) {
             fclose($destfile);
+        }
 
         return true;
-        /* $file_mac = cbc_mac($data, $k, $iv);
-          print "\nchecking mac\n";
-          if (array($file_mac[0] ^ $file_mac[1], $file_mac[2] ^ $file_mac[3]) != $meta_mac) {
-          echo "MAC mismatch";
-          } */
     }
 
-    private function mega_get_file_info($hash) {
+    private function mega_get_file_info($hash)
+    {
         preg_match('/\!(.*?)\!(.*)/', $hash, $matches);
         $id = $matches[1];
         $key = $matches[2];
         $key = $this->base64_to_a32($key);
-        $k = array($key[0] ^ $key[4], $key[1] ^ $key[5], $key[2] ^ $key[6], $key[3] ^ $key[7]);
-        $iv = array_merge(array_slice($key, 4, 2), array(0, 0));
+        $k = array(
+            $key[0] ^ $key[4],
+            $key[1] ^ $key[5],
+            $key[2] ^ $key[6],
+            $key[3] ^ $key[7],
+        );
+        $iv = array_merge(array_slice($key, 4, 2), array(
+            0,
+            0,
+        ));
         $meta_mac = array_slice($key, 6, 2);
-        $info = $this->mega_api_req(array('a' => 'g', 'g' => 1, 'p' => $id));
-        if (!$info['g']) die('<b><font color=red>No such file on mega. Maybe it was deleted.</font></b>');
-        return array('id' => $id, 'key' => $key, 'k' => $k, 'iv' => $iv, 'meta_mac' => $meta_mac, 'binary_url' => $info['g'], 'attr' => $this->mega_dec_attr($this->base64urldecode($info['at']), $k), 'size' => $info['s']);
+        $info = $this->mega_api_req(array(
+            'a' => 'g',
+            'g' => 1,
+            'p' => $id,
+        ));
+        if (!$info['g']) {
+            die('<b><font color=red>No such file on mega. Maybe it was deleted.</font></b>');
+        }
+
+        return array(
+            'id' => $id,
+            'key' => $key,
+            'k' => $k,
+            'iv' => $iv,
+            'meta_mac' => $meta_mac,
+            'binary_url' => $info['g'],
+            'attr' => $this->mega_dec_attr($this->base64urldecode($info['at']), $k),
+            'size' => $info['s'],
+        );
     }
 
     /**
      * Returns file information
      * @return array File information
      */
-    function file_info() {
+
+    public function file_info()
+    {
         return $this->f;
     }
-
 }

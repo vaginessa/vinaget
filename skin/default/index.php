@@ -48,30 +48,36 @@
 				<tr>
 				<!-- ########################## Begin Plugins ########################## -->
 				<td valign="top">
-					<table width="100%"  border="0">
-						<tr><td valign="top">
-							<table border="0" cellpadding="0" cellspacing="0">
-								<tr><td width="140" height="100%"><div class="cell-plugin"><?php printf($obj->lang['plugins']); ?></div></td></tr>
-								<tr><td><div align="center" class="plugincolhd"><b><small><?php echo count($host);?></small></b> <?php printf($obj->lang['plugins']); ?></div></td></tr>
-								<tr><td height="100%" style="padding:3px;">
-									<div dir="rtl" align="left" style="overflow-y:scroll; height:150px; padding-left:20px;">
-									<?php
-										foreach ($host as $key => $val){
-											echo "<span class='plugincollst'>" .$key."</span><br />";
-										}
-									?>
-									</div><br />
-									<div class="cell-plugin"><?php printf($obj->lang['premium']); ?></div>
-									<table border="0">
-										<tr><td height="100%" style="padding:3px;">
-											<div dir="rtl" align="left" style="padding-left:5px;">
-												<?php showPlugin(); ?>
-											</div>
-										</td></tr>
-									</table><br />
-								</td></tr>
-							</table>
+					<table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top:3px">
+						<?php if ($obj->hide_plugins_col == false) { ?>
+						<tr><td>
+							<div class="cell-plugin"><?php printf($obj->lang['plugins']); ?></div>
+							<div align="center" class="plugincolhd">
+								<b><small><?php echo count($host);?></small></b> <?php printf($obj->lang['plugins']); ?>
+							</div>
+							<div dir="rtl" align="left" style="overflow-y:scroll; height:150px; margin-left: 2px; padding-left:10px;">
+							<?php
+								foreach ($host as $key => $val){
+									echo "<span class='plugincollst'>" .$key."</span><br />";
+								}
+							?>
+							</div>
 						</td></tr>
+						<tr><td><br></td></tr>
+						<?php } ?>
+						<?php if ($obj->hide_preacc_col == false) { ?>
+						<tr><td>
+							<div class="cell-plugin"><?php printf($obj->lang['premium']); ?></div>
+							<table border="0">
+								<tr><td style="padding:3px;">
+									<div dir="rtl" align="left" style="padding-left:5px;">
+										<?php showPlugin(); ?>
+									</div>
+								</td></tr>
+							</table><br />
+						</td></tr>
+						<?php } ?>
+					
 					</table>
 				</td>
 				<!-- ########################## End Plugins ########################## -->
@@ -153,11 +159,12 @@
 						else {
 ?>
 							<form action="javascript:get(document.getElementById('linkform'));" name="linkform" id="linkform">
-								<font color="#FF3300"><b><font color="#FFFF66"><?php printf($obj->lang['homepage']);?></font> - <?php printf($obj->lang['welcome']);?></b></font>
+								<font color="#FF3300"><b><font color="#FFFF66"><?php printf($obj->lang['version']);?></font> - <?php printf($obj->lang['welcome']);?></b></font>
 								<?php if($obj->isadmin()){
 									$obj->last_version = $obj->getversion();
-									if($obj->last_version > $obj->current_version)
-										echo '<br><font color="#dbac58"><b>'.sprintf($obj->lang['update1']).'</b> - <a href="http://rapidleech.com/forum/viewtopic.php?f=36&t=559">'.sprintf($obj->lang['update2'],$obj->last_version).'</a></font>'; 
+									if($obj->last_version > $obj->ltt_version) {
+										echo '<br><font color="#dbac58"><b>'.sprintf($obj->lang['update1']).'</b> - <a href="https://github.com/ltt2801/new-vinaget-script">'.sprintf($obj->lang['update2'],$obj->last_version).'</a></font> - <a href="https://raw.githubusercontent.com/ltt2801/new-vinaget-script/master/changelog.txt">changelog</a><br>';
+									}
 								}
 								?>
 								<br><font face=Arial size=1><span style="font-familty: Arial; color: #FFFFFF; font-size: 10px">Example: http://www.megaupload.com/?d=ABCDEXYZ<font size="3">|</font>password</span></font><BR>
@@ -165,8 +172,14 @@
 								<b>Proxy (host:port) or (host:port|user:pass)</b><BR>
 								<input id='proxy' name='proxy' placeholder='proxy' style='width:300px;'><BR><BR>
 								<input type="submit"  id ='submit' value='<?php printf($obj->lang['sbdown']); ?>'/>&nbsp;&nbsp;&nbsp;
-								<input type="button" onclick="reseturl();return false;" value="Reset">&nbsp;&nbsp;&nbsp;
-								<input type="checkbox" name="autoreset" id="autoreset" checked>&nbsp;Auto reset&nbsp;&nbsp;&nbsp;
+								<input type="button" onclick="reseturl();return false;" value="<?php printf($obj->lang['reset']); ?>">&nbsp;&nbsp;&nbsp;
+								<input type="checkbox" name="autoreset" id="autoreset" checked>&nbsp;<?php printf($obj->lang['autoreset']);?>&nbsp;&nbsp;&nbsp;
+								<?php if ($obj->show_func_cbox == true) { ?>
+								<input type="checkbox" id="autopcbox" /><font color="#FFFFFF"><?php printf($obj->lang['postcbox']);?></font>&nbsp;&nbsp;&nbsp;
+								<input type="checkbox" id="autosearchuser" /><font color="#FFFFFF"><?php printf($obj->lang['searchuser']);?></font><br><br>
+								<font color="#FFFFFF">Nick:</font> <input type="text" autocomplete="off" id="nick" style="width:25em"  value="" /><br><br>
+								<font color="#FFFFFF">Key:</font> <input type="password" autocomplete="off" id="pass" style="width:25em" value="" />
+								<?php } ?>
 							</form><BR><BR>
 							<div id="dlhere" align="left" style="display: none;">
 								<BR><hr /><small style="color:#55bbff"><?php printf($obj->lang['dlhere']); ?></small>
@@ -193,11 +206,14 @@
 						<?php showStat();?>
 						<!-- End Server Info -->
 						<hr />
-						<script type="text/javascript" language="javascript" src="ajax.js?ver=1.0"></script> 
+						<script type="text/javascript" language="javascript" src="ajax.js?v=<?php echo mt_rand(); ?>"></script> 
 					<!-- Copyright please don't remove-->
-						<STRONG><SPAN class='powered'>Code LeechViet. Developed by ..:: [H] ::..<br/>Powered by <a href='http://rapidleech.com/forum/viewforum.php?f=23'><?php printf($obj->lang['version']); ?> Revision <?php printf($obj->current_version); ?></a> by [FZ]</SPAN><br/>
-						<SPAN class='copyright'>Copyright 2009-<?php echo date('Y');?> by <a href='http://vinaget.us/'>http://vinaget.us</a>. All rights reserved. </SPAN><br />
-					<!-- Copyright please don't remove-->	
+						<STRONG><SPAN class='powered'>
+							Based on <a href='https://github.com/giaythuytinh176/vinaget-script'>Vinaget 2.7.0 Final Revision <?php printf($obj->current_version); ?></a> by [FZ]<br/>
+							Developed by LTT. Find me on Github <a target='_blank' href='https://github.com/ltt2801/new-vinaget-script'><?php printf($obj->ltt_version); ?></a>
+						</SPAN></STRONG><br/>
+						<SPAN class='copyright'>Copyright 2009-<?php echo date('Y');?> by <a href='http://vinaget.us/'>http://vinaget.us</a>. All rights reserved.</SPAN><br />
+					<!-- Copyright please don't remove-->
 					</div>
 				</td></tr>
 			</table>
